@@ -1,4 +1,4 @@
-# GenoPhonic (GP) for AI Voice ID
+# GenoPhonic (GP) for AI Voice ID 🎤🤖〰️
 
 GP is an AI tool that can tell if a voice in an audio recording belongs to one person or another. It’s designed to distinguish between two specific people (like you and someone else) by analyzing the unique features of their voices.
 
@@ -8,7 +8,6 @@ GP is an AI tool that can tell if a voice in an audio recording belongs to one p
 - **Easy to Train**: You can quickly train it to recognize your voice and another person's voice.
 
 ## How You Might Use It:
-
 - For personal use, like setting up voice-based security for your devices.
 - To make your smart home respond differently depending on who's talking.
 - Or just for fun, to see how well it can tell voices apart.
@@ -19,4 +18,4 @@ GP is an AI tool that can tell if a voice in an audio recording belongs to one p
 - Start identifying who’s talking in your recordings!
 
 ## License:
-This project is under a GNU General Public License (GPL) with Affero Clause (AGPL).
+This project is under a GNU Affero General Public License v3.0
