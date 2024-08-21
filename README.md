@@ -17,5 +17,31 @@ GP is an AI tool that can tell if a voice in an audio recording belongs to one p
 - Follow the instructions to train the AI with your own voice samples.
 - Start identifying who’s talking in your recordings!
 
+## Setup Instructions:
+
+### 1. Create a Conda Environment
+
+First, create a new Conda environment to manage the dependencies for this project:
+
+```bash
+conda env create -f environment.yml
+conda activate voice_classifier
+```
+
+### 2. Install FFmpeg
+This project requires FFmpeg to convert OPUS files to WAV format. Please install FFmpeg according to your operating system:
+
+- **Windows**: Download the latest build from [here](https://ffmpeg.org/download.html#build-windows).
+- **macOS**: Install via Homebrew: `brew install ffmpeg`.
+- **Linux**: Install via package manager: `sudo apt-get install ffmpeg`.
+
+### 3. Data Preparation
+This project requires FFmpeg to convert OPUS files to WAV format. Please install FFmpeg according to your operating system:
+
+```bash
+python src/data_processing.py
+```
+
+
 ## License:
 This project is under a GNU Affero General Public License v3.0

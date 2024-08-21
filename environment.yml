@@ -1,0 +1,14 @@
+name: gp
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pytorch
+  - torchaudio
+  - pandas
+  - numpy
+  - scipy
+  - matplotlib
+  - librosa
