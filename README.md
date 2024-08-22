@@ -41,7 +41,15 @@ This project requires FFmpeg to convert OPUS files to WAV format. Please install
 ```bash
 python src/data_processing.py
 ```
+To start training, run:
+```bash
+python main.py train
+```
 
+To evaluate the model, run:
+```bash
+python main.py evaluate
+```
 
 ## License:
 This project is under a GNU Affero General Public License v3.0

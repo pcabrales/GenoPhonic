@@ -23,5 +23,5 @@ for file_path in os.listdir(wav_dir):
     y, sr = librosa.load(file_path, sr=sr)
     mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, hop_length=hop_length)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
-    features = mel_spec_db.T  # Transpose to make it (time, features)
+    features = mel_spec_db  # Transpose to make it (time, features)
     np.save(processed_path, features)
