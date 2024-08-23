@@ -1,10 +1,11 @@
 import os
 import sys
 import torch
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from dataset import GPDataset
-from model import GPClassifier
+from model import ASTModel
 from utils import set_seed
 
 def evaluate(model, test_loader, device):
@@ -12,10 +13,11 @@ def evaluate(model, test_loader, device):
     correct = 0
     total = 0
     with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
-            _, predicted = torch.max(outputs, 1)
+        for inputs, labels in tqdm(test_loader):
+            inputs, labels = inputs.to(device), labels.float().to(device).unsqueeze(1)
+            inputs = inputs.permute(0, 2, 1)
+            outputs = model(inputs).float()
+            predicted = (torch.nn.functional.sigmoid(outputs) > 0.5).float()  # for binary classification
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
 
@@ -27,6 +29,7 @@ def main(seed = 42,
     hop_length = 512,  # HAS TO BE CONSISTENT WITH THE data_processing.py FILE
     window_size = 2,
     overlap = 1):
+    
     set_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +47,15 @@ def main(seed = 42,
                               indices=test_indices)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-    model = GPClassifier(input_dim=128, num_classes=2).to(device)
+    input_fdim = 128  # HAS TO BE CONSISTENT WITH n_mels IN THE data_processing.py FILE
+    input_tdim = test_dataset.frames_per_window
+    print(input_tdim)
+    model = ASTModel(input_tdim=input_tdim,
+                     label_dim=1,
+                     input_fdim=input_fdim,
+                     imagenet_pretrain=False,
+                     audioset_pretrain=False).to(device)
+    
     model_path = os.path.join(script_dir, '../models/model.pth')
     model.load_state_dict(torch.load(model_path))
     accuracy = evaluate(model, test_loader, device)

@@ -7,8 +7,13 @@ dependencies:
   - pip
   - pytorch
   - torchaudio
+  - librosa
+  - scikit-learn
   - pandas
   - numpy
   - scipy
   - matplotlib
-  - librosa
+  - tqdm
+  - pip:
+    - wget
+    - timm==0.4.5

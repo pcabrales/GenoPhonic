@@ -19,6 +19,8 @@ class GPDataset(Dataset):
         self.frames_per_overlap = int(self.overlap * sr / hop_length)
         self.step_size = self.frames_per_window - self.frames_per_overlap
         
+        print(self.frames_per_window, self.frames_per_overlap, self.step_size)
+        
         if not os.path.exists(data_dir):
             raise FileNotFoundError(f'{data_dir} does not exist')
         
@@ -52,5 +54,6 @@ class GPDataset(Dataset):
         window_start = window_idx * self.step_size
         window_end = window_start + self.frames_per_window
         window_features = torch.tensor(features[:, window_start:window_end])
-        
+
         return window_features, label
+    
