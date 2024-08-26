@@ -13,3 +13,9 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.enabled = False
     return True
+
+def convert_to_list(value):
+    if torch.is_tensor(value):
+        return value.tolist()
+    return value
+

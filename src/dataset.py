@@ -8,7 +8,7 @@ class GPDataset(Dataset):
     
     # using a sliding window approach to divide the audio file into smaller segments
     
-    def __init__(self, data_dir, labels_file, window_size, overlap, sr, hop_length, indices=None):
+    def __init__(self, data_dir, window_size, overlap, sr, hop_length, indices=None, labels_file=None):
         self.data_dir = data_dir
         self.window_size = window_size
         self.overlap = overlap
@@ -19,15 +19,15 @@ class GPDataset(Dataset):
         self.frames_per_overlap = int(self.overlap * sr / hop_length)
         self.step_size = self.frames_per_window - self.frames_per_overlap
         
-        print(self.frames_per_window, self.frames_per_overlap, self.step_size)
-        
         if not os.path.exists(data_dir):
             raise FileNotFoundError(f'{data_dir} does not exist')
         
-        if not os.path.exists(labels_file):
-            raise FileNotFoundError(f'{labels_file} does not exist')
+        if labels_file is not None:
+            self.df_labels = pd.read_csv(labels_file)
+        else:
+            self.df_labels = pd.DataFrame({'file': [file.replace('.npy', '') for file in os.listdir(data_dir)]})
+            self.df_labels['label'] = np.nan    
         
-        self.df_labels = pd.read_csv(labels_file)
         if indices is not None:
             self.df_labels = self.df_labels.iloc[indices].reset_index(drop=True)
             
@@ -54,6 +54,11 @@ class GPDataset(Dataset):
         window_start = window_idx * self.step_size
         window_end = window_start + self.frames_per_window
         window_features = torch.tensor(features[:, window_start:window_end])
+        
+        additional_info = {'file': self.df_labels.iloc[file_idx, 0],
+                           'time_start': window_start * self.hop_length / self.sr,
+                           'time_end': window_end * self.hop_length / self.sr
+                           }
 
-        return window_features, label
+        return window_features, label, additional_info
     

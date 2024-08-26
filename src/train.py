@@ -43,9 +43,9 @@ def train(model, train_loader, criterion, optimizer, device):
 def main(seed = 42,
     sr = 16000,  # HAS TO BE CONSISTENT WITH THE data_processing.py FILE
     hop_length = 512,  # HAS TO BE CONSISTENT WITH THE data_processing.py FILE
-    window_size = 2,
-    overlap = 1,
-    N_epochs = 2):
+    window_size = 3,
+    overlap = 0.5,
+    N_epochs = 10):
     
     set_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -73,12 +73,15 @@ def main(seed = 42,
                      imagenet_pretrain=False,
                      audioset_pretrain=False).to(device)
     criterion = BCEWithLogitsLoss()
-    # optimizer = AdamW(model.parameters(), lr=0.0001)
     
-    trainables = [p for p in model.parameters() if p.requires_grad]
-    print('Total parameter number is : {:.3f} million'.format(sum(p.numel() for p in model.parameters()) / 1e6))
-    print('Total trainable parameter number is : {:.3f} million'.format(sum(p.numel() for p in trainables) / 1e6))
-    optimizer = torch.optim.Adam(trainables, 0.001, weight_decay=5e-7, betas=(0.95, 0.999))
+    ## ADAMW
+    optimizer = AdamW(model.parameters(), lr=0.0001)
+     
+    ## ADAM
+    # trainables = [p for p in model.parameters() if p.requires_grad]
+    # print('Total parameter number is : {:.3f} million'.format(sum(p.numel() for p in model.parameters()) / 1e6))
+    # print('Total trainable parameter number is : {:.3f} million'.format(sum(p.numel() for p in trainables) / 1e6))
+    # optimizer = torch.optim.Adam(trainables, 0.0001, weight_decay=5e-7, betas=(0.95, 0.999))
 
     for epoch in range(N_epochs):  # Define your number of epochs
         loss, accuracy = train(model, train_loader, criterion, optimizer, device)
