@@ -1,25 +1,42 @@
 import os
 import sys
+import numpy as np
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from dataset import GPDataset
 from model import ASTModel
-from utils import set_seed, convert_to_list
+from utils import set_seed, convert_to_list, plot_predicted_windows
 
 def evaluate(model, test_loader, device):
     model.eval()
     correct = 0
     total = 0
+    energy_threshold = 3  # values above this are for class 1, below -energy_threshold are for class 0 and in between are for class 2 (uncertain)
     incorrect_files = {}
-    additional_info_complete = {'file': [], 'time_start': [], 'time_end': [], 'predicted': []}
+    additional_info_complete = {'file': [], 'time_start': [], 'time_end': [], 'predicted': [], 'probability': []}
     with torch.no_grad():
         for inputs, labels, additional_info in tqdm(test_loader):
             inputs, labels = inputs.to(device), labels.float().to(device).unsqueeze(1)
             inputs = inputs.permute(0, 2, 1)
             outputs = model(inputs).float()
-            predicted = (torch.nn.functional.sigmoid(outputs) > 0.5).float()  # for binary classification
+            
+            # # Determining the label with softmax probabilities
+            # probability = torch.sigmoid(outputs)
+            # predicted = (probability > 0.5).float()
+            
+            # Determining the label with energy threshold
+            predicted = torch.where(outputs > energy_threshold, torch.tensor(1).to(device), torch.where(outputs < -energy_threshold, torch.tensor(0).to(device), torch.tensor(2).to(device)))
+            
+            # # Let's find silent windows
+            # for input_feature in inputs:
+            #     rms = torch.mean(input_feature).item()
+            #     # # Determine the label
+            #     # if rms < silence_threshold:
+            #     #     label = 2  # Label for silence
+                
+                
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             
@@ -33,13 +50,12 @@ def evaluate(model, test_loader, device):
                         incorrect_files[audio_file] = 1
             
             print(f'For file {additional_info["file"][0]:s}, with window starting at {additional_info["time_start"].item():.1f}s and ending at {additional_info["time_end"].item():.1f}s:')
-            print(f'Predicted: {predicted.squeeze().item()}')
+            print(f'Predicted: {predicted.squeeze().item()}, with output value: {outputs.squeeze().item():.2f}')
             
             predicted_complete = additional_info_complete['predicted'] + convert_to_list(predicted.squeeze(1))
             additional_info_complete = {key: additional_info_complete[key] + convert_to_list(additional_info[key]) for key in additional_info}
             additional_info_complete['predicted'] = predicted_complete
             
-    print(additional_info_complete)
     accuracy = 100 * correct / total
     
     return accuracy, incorrect_files, additional_info_complete
@@ -94,61 +110,10 @@ def main(
     # print(f'Incorrectly predicted files: {incorrect_files}')
     # print(f'Number of incorrectly predicted files: {len(incorrect_files)}') 
     
-    ###
-    import matplotlib.pyplot as plt 
-
-    # Enable grid
-    # Create a figure and axis
-    data_dict = additional_info_complete
-    fig, ax = plt.subplots()
-
-    # Get unique filenames to plot them separately
-    unique_files = sorted(set(data_dict['file']))
-
-    # Define colors for labels
-    colors = {0: 'red', 1: 'green'}
-
-    # Iterate over unique filenames
-    for file in unique_files:
-        # Get indices where filename matches
-        indices = [i for i, fname in enumerate(data_dict['file']) if fname == file]
-        
-        # Plot each window for this file
-        for idx in indices:
-            start_time = data_dict['time_start'][idx]
-            end_time = data_dict['time_end'][idx]
-            label = data_dict['predicted'][idx]
-            
-            # Draw a horizontal line for each window
-            ax.hlines(y=file, xmin=start_time, xmax=end_time, color=colors[label], linewidth=5)
-
-    # Set labels and title
-    ax.set_xlabel('Time')
-    ax.set_ylabel('File')
-    ax.set_title('Voice Classification GenoPhonic (GP)')
-
-    ax.set_yticks(range(len(unique_files)))
-    ax.set_yticklabels(unique_files)
-
-    # Adjust y-axis label rotation and spacing
-    plt.yticks(rotation=0)  # Rotate y-axis labels for better fit
-    plt.tight_layout(pad=4)  # Adjust layout to make space for y-axis labels
-
-    # Increase space on the left to fit the labels
-    plt.subplots_adjust(left=0.4)
+    save_plot_dir = os.path.join(script_dir, '../images/test-predicted.png')
+    label_names={0: 'Pablo', 1: 'Ginebra', 2:'Silence/Uncertain'}
+    plot_predicted_windows(additional_info_complete, save_plot_dir, label_names=label_names)
     
-    import matplotlib
-    
-    # Create custom legend
-    red_patch = matplotlib.patches.Patch(color='red', label='Pablo')
-    green_patch = matplotlib.patches.Patch(color='green', label='Ginebra')
-
-    # Add legend to plot
-    plt.legend(handles=[red_patch, green_patch], title='Labels', loc='upper right')
-    plt.grid(True, linewidth=2.5)
-    
-    plt.savefig(os.path.join(script_dir, '../images/test-predicted.png'))
-    ###
     
 if __name__ == "__main__":
     main()

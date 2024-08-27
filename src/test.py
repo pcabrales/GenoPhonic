@@ -9,7 +9,8 @@ sys.path.append(script_dir)
 # Load the test wave (normally done in data_processing.py)
 
 test_wav_dir = os.path.join(script_dir, '../data/test-wav')
-processed_dir = os.path.join(script_dir, '../data/test-processed')
+processed_relative_dir = '../data/test-processed'
+processed_dir = os.path.join(script_dir, processed_relative_dir)
 if not os.path.exists(processed_dir):
     os.makedirs(processed_dir)
 
@@ -26,8 +27,7 @@ for file_path in os.listdir(test_wav_dir):
     mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, hop_length=hop_length)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
     np.save(processed_path, mel_spec_db)
-    
 
 
 if __name__ == "__main__":
-    evaluate_main(data_dir='../data/test-processed', labels_file=None, batch_size=1, test_size=1.)
+    evaluate_main(data_dir=processed_relative_dir, labels_file=None, batch_size=1, test_size=1.)
