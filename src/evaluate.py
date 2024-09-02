@@ -103,7 +103,15 @@ def main(
     model_path = os.path.join(script_dir, '../models/model.pth')
     model.load_state_dict(torch.load(model_path))
     accuracy, incorrect_files, additional_info_complete = evaluate(model, test_loader, device)
-    print(f'Test Accuracy: {accuracy:.2f}%')
+    if accuracy > 0:
+        print(f'Test Accuracy: {accuracy:.2f}%')
+        
+    # Count the number of predictions for each class
+    class_counts = {0: 0, 1: 0, 2: 0}
+    for prediction in additional_info_complete['predicted']:
+        class_counts[prediction] += 1
+    print(f'Class counts: {class_counts}')
+    print(f'Class 0 spoke {class_counts[0] / (class_counts[1] + class_counts[0]) * 100:.2f} % of times')
     
     # # order the dict by counts
     # incorrect_files = {k: v for k, v in sorted(incorrect_files.items(), key=lambda item: item[1], reverse=True)}

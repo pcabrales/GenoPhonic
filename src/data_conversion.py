@@ -10,9 +10,6 @@ output_folder =  os.path.join(script_dir, '../data/wav')
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
 
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
 for file_name in os.listdir(input_folder):
     if file_name.endswith('.opus'):
         input_path = os.path.join(input_folder, file_name)
