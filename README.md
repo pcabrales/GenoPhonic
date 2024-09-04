@@ -31,6 +31,7 @@ First, create a new Conda environment to manage the dependencies for this projec
 ```bash
 conda env create -f environment.yml
 conda activate gp
+cd src
 ```
 
 ### 2. Install FFmpeg
@@ -49,9 +50,28 @@ This project requires FFmpeg to convert OPUS files to WAV format. Please install
 Run the following command to train the model with the provided data:
 
 ```bash
-python src/train.py  --audio_dir path/to/audio_dir_training --labels_name ['speaker1', 'speaker2']
+python train.py  --audio_dir path/to/audio_dir_training/from/src --labels_name ['speaker1', 'speaker2']
 ```
-There are other optional arguments you can use to customize the training process. Run `python src/train.py --help` to see them.
+
+For example, if you have a folder called `data` with the following structure:
+```
+data
+├── training
+│   ├── audio1.opus
+│   ├── audio2.opus
+│   └── ...
+└── testing
+    ├── audio1.opus
+    ├── audio2.opus
+    └── ...
+```
+
+You would run:
+```bash
+python train.py  --audio_dir ../data/training --labels_name ['speaker1', 'speaker2']
+```
+
+There are other optional arguments you can use to customize the training process. Run `python train.py --help` to see them.
 
 You will see the accuracy of the model on the training and validation sets. The model will be saved in the `models` folder.
 
@@ -59,7 +79,7 @@ You will see the accuracy of the model on the training and validation sets. The 
 Run the following command to test the model with the provided data:
 
 ```bash
-python src/test.py  --audio_dir path/to/audio_dir_testing'
+python test.py  --audio_dir path/to/audio_dir_testing/from/src'
 ```
 You will see how much each speaker spoke relative to the total, and images with visualizations of the model's predictions will be saved.
 

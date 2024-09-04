@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from dataset import GPDataset
 # from model import GPClassifier
 from model import ASTModel
-from utils import set_seed, label_dataset, convert_to_wav, convert_to_mel_spectrogram, convert_to_list, plot_predicted_windows
+from utils import set_seed, plot_predicted_and_spectrogram, label_dataset, convert_to_wav, convert_to_mel_spectrogram, convert_to_list, plot_predicted_windows
 
 def train(model, train_loader, criterion, optimizer, device):
     model.train()
@@ -194,16 +194,21 @@ def main(
     for speakername in speakernames:
         print(f'{speakername:s} spoke {speakername_counts[speakername] / total_speakername_counts * 100:.2f} % of times')
     
+    label_names = {speakernames.index(speakername): speakername for speakername in speakernames}
+    label_names[-1] = 'Silence/Uncertain'
     # order the dict by counts
     if labels_file is not None:
         incorrect_files = {k: v for k, v in sorted(incorrect_files.items(), key=lambda item: item[1], reverse=True)}
         print('Incorrectly predicted files (ten first values):')
         print({k: incorrect_files[k] for k in list(incorrect_files)[:10]})
         print(f'Number of incorrectly predicted files: {len(incorrect_files)}')
+    # if labels_file is None:
+    #     save_plot_dir = os.path.join(script_dir, f'../images/{dataset_name}-spectrogram-predicted.png')
+    #     file_path = 'mix-voice-pablo-phone'
+    #     plot_predicted_and_spectrogram(file_path, processed_dir, additional_info_complete, save_plot_dir, label_names=label_names)
+        
     
     save_plot_dir = os.path.join(script_dir, f'../images/{dataset_name}-predicted.png')
-    label_names = {speakernames.index(speakername): speakername for speakername in speakernames}
-    label_names[-1] = 'Silence/Uncertain'
     plot_predicted_windows(additional_info_complete, save_plot_dir, label_names=label_names)
     
         
