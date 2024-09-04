@@ -68,7 +68,6 @@ def main(
     hop_length = 512,  # HAS TO BE CONSISTENT WITH THE data_processing.py FILE
     window_size = 3,
     overlap = 0.5,
-    batch_size = 32,
     test_size=0.2):  # Has to be 1 - train_size if testing on the same dataset as training
     
     set_seed(seed)
